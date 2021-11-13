@@ -105,4 +105,4 @@ dist
 node_modules
 
 #Json lock
-package-lock.json
+package-lock.json*
