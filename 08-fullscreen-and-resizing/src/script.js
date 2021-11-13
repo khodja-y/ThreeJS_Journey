@@ -23,9 +23,64 @@ scene.add(mesh)
  * Sizes
  */
 const sizes = {
-    width: 800,
-    height: 600
+    width: window.innerWidth,
+    height: window.innerHeight
 }
+
+
+//Update resizing 
+window.addEventListener('resize', () =>
+{
+    // console.log('window has been resized')
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    //Update Camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    //Update the renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)) //for more than 1 in pixel ratio
+})
+
+
+//Go fullscreen
+//don't work ont safari
+/* window.addEventListener('dblclick', () => 
+{
+    if(!document.fullscreenElement) canvas.requestFullscreen() //Enter fullscreen
+    else document.exitFullscreen() //Exit fullscree,
+}) */
+
+//Works on safari
+window.addEventListener('dblclick', () => 
+{
+    const fullscreenElement = document.fullscreenElement || document.webkitfullscreenElement
+
+    if(!fullscreenElement)
+    {
+        if(canvas.requestFullscreen)
+        {
+            canvas.requestFullscreen() //Enter fullscreen
+        } 
+        else if(canvas.webkitrequestFullscreen)
+        {
+            canvas.webkitrequestFullscreen()
+        }
+    } 
+    else 
+    {
+        if(document.exitFullscreen) //Exit fullscreen
+        {
+            document.exitFullscreen()
+        }else if(document.webkitexitFullscreen)
+        {
+            document.webkitexitFullscreen()
+        }
+    }
+})
+
 
 /**
  * Camera
@@ -37,6 +92,7 @@ scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
+// controls.enabled = false
 controls.enableDamping = true
 
 /**
@@ -46,6 +102,8 @@ const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
 renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)) //for more than 1 in pixel ratio
+
 
 /**
  * Animate
