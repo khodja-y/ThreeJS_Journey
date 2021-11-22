@@ -1,6 +1,20 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import gsap from 'gsap'
+import GUI from 'lil-gui';
+
+
+
+/**
+ * Debug
+ */
+const gui = new GUI();
+gui.add( document, 'title' );
+
+const parameters = {
+    color: 0xff0000
+}
 
 /**
  * Base
@@ -11,58 +25,39 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-// Object
-// const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2)
-// const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-// const mesh = new THREE.Mesh(geometry, material)
-// scene.add(mesh)
-
-//Create a buffer geometry
-// const positions = new Float32Array(9)
-// //first vertice
-// positions[0] = 0
-// positions[1] = 0
-// positions[2] = 0
-// //second vertice
-// positions[3] = 0
-// positions[4] = 1
-// positions[5] = 0
-// //third vertice
-// positions[6] = 1
-// positions[7] = 0
-// positions[8] = 0
-
-//other way to instantiate a float array in JS
-// const positions = new Float32Array([
-//     0, 0, 0,
-//     0, 1, 0,
-//     1, 0, 0
-// ])
-
-//const positionAttribute = new THREE.BufferAttribute(positions, 3)
-const geometry = new THREE.BufferGeometry()
-// geometry.setAttribute('position', positionAttribute)
-// const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
-// const mesh = new THREE.Mesh(geometry, material)
-// scene.add(mesh)
-
-
-//create another geometry object
-const count = 500
-const positionsArray = new Float32Array((count * 3) * 3)
-for(let i = 0; i < count * 3 * 3; i++){
-    positionsArray[i] = (Math.random() - 0.5) * 2
-} 
-const positionAttribute = new THREE.BufferAttribute(positionsArray, 3)
-geometry.setAttribute('position', positionAttribute)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+/**
+ * Object
+ */
+const geometry = new THREE.BoxGeometry(1, 1, 1)
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
 
+//Debug
+gui.add(mesh.position, 'x', -4, 4, 0.01)
+gui.add(mesh.position, 'y', -4, 4, 0.01)
+//Other Writing
+gui
+    .add(mesh.position, 'z', -4, 4, 0.01)
+    .min(-4)
+    .max(4)
+    .step(0.01)
+    .name('PositionZ')
 
+gui
+    .add(mesh, 'visible')
 
+gui
+    .add(material, 'wireframe')
 
-// Sizes
+gui
+    .addColor(material, 'color')
+
+console.log(material.color); 
+
+/**
+ * Sizes
+ */
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -83,7 +78,10 @@ window.addEventListener('resize', () =>
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-// Camera
+/**
+ * Camera
+ */
+// Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.z = 3
 scene.add(camera)
@@ -92,14 +90,18 @@ scene.add(camera)
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
 
-// Renderer
+/**
+ * Renderer
+ */
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-// Animate
+/**
+ * Animate
+ */
 const clock = new THREE.Clock()
 
 const tick = () =>
