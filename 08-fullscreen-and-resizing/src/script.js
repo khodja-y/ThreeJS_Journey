@@ -46,7 +46,7 @@ window.addEventListener('resize', () =>
 
 
 //Go fullscreen
-//don't work ont safari
+//don't work on safari
 /* window.addEventListener('dblclick', () => 
 {
     if(!document.fullscreenElement) canvas.requestFullscreen() //Enter fullscreen

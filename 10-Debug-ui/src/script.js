@@ -52,8 +52,11 @@ gui
 
 gui
     .addColor(material, 'color')
+gui
+    .add(material, 'opacity')
+    .min(0)
+    .max(1)
 
-console.log(material.color); 
 
 /**
  * Sizes
