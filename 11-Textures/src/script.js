@@ -1,28 +1,51 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import gsap from 'gsap'
-import GUI from 'lil-gui';
-
-
 
 /**
- * Debug
- */
-const gui = new GUI({width : 400});
-gui.close();
-gui.add( document, 'title' );
-
-/**
- * Parameters to use as object parameter
+ * Textures
  */
 
-const parameters = {
-    color: 0xff0000,
-    spin: () =>{
-        gsap.to(mesh.rotation, {duration: 1, y: mesh.rotation.y + 10})
-    }
+//JS Native
+const imgSource = new Image()
+const texture = new THREE.Texture(imgSource)
+
+imgSource.onload = () =>{
+    texture.needsUpdate = true;
 }
+imgSource.src = '/textures/door/color.jpg'
+
+//THREE JS
+const loadingManager = new THREE.LoadingManager()
+
+loadingManager.onStart = () =>
+{
+    console.log("OnStart");
+}
+
+loadingManager.onLoad = () =>
+{
+    console.log("onLoad");
+}
+
+loadingManager.onProgress = () =>
+{
+    console.log("onProgress");
+}
+
+loadingManager.onError = () =>
+{
+    console.log("OnError");
+}
+
+const textureLoader = new THREE.TextureLoader(loadingManager)
+const colorTexturetextureTJS = textureLoader.load('/textures/door/color.jpg')
+const alphaTexturetextureTJS = textureLoader.load('/textures/door/alpha.jpg')
+const heightTexturetextureTJS = textureLoader.load('/textures/door/height.jpg')
+const normalTexturetextureTJS = textureLoader.load('/textures/door/normal.jpg')
+const ambientOcclusionTexturetextureTJS = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+const metalnessTexturetextureTJS = textureLoader.load('/textures/door/metalness.jpg')
+const roughnessTexturetextureTJS = textureLoader.load('/textures/door/roughness.jpg')
 
 /**
  * Base
@@ -37,33 +60,9 @@ const scene = new THREE.Scene()
  * Object
  */
 const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+const material = new THREE.MeshBasicMaterial({ map: colorTexturetextureTJS })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
-
-//Debug
-gui.add(mesh.position, 'x', -4, 4, 0.01)
-gui.add(mesh.position, 'y', -4, 4, 0.01)
-
-//Other Writing
-gui
-    .add(mesh.position, 'z', -4, 4, 0.01)
-    .min(-4)
-    .max(4)
-    .step(0.01)
-    .name('PositionZ')
-
-gui
-    .add(mesh, 'visible')
-
-gui
-    .add(material, 'wireframe')
-
-gui
-    .addColor(material, 'color')
-
-gui
-    .add(parameters, 'spin')
 
 /**
  * Sizes
@@ -93,7 +92,9 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.z = 3
+camera.position.x = 1
+camera.position.y = 1
+camera.position.z = 1
 scene.add(camera)
 
 // Controls
