@@ -126,7 +126,7 @@ const materialWalls = new THREE.MeshStandardMaterial({
     map : wallColorTexture,
     aoMap : wallAmbientTexture,
     // displacementMap : wallHeightTexture,
-    // displacementScale : 0.05,
+    // displacementScale : 0.1,
     normalMap : wallNormalTexture,
     normalScale : new THREE.Vector2(0.4, 0.4),
     roughnessMap :wallRoughnessTexture,
@@ -156,8 +156,6 @@ const materialDoor = new THREE.MeshStandardMaterial({
 const materialGrass = new THREE.MeshStandardMaterial({
     map : grassColorTexture,
     aoMap : grassAmbientTexture,
-    // displacementMap : wallHeightTexture,
-    // displacementScale : 0.05,
     normalMap : grassNormalTexture,
     normalScale : new THREE.Vector2(0.4, 0.4),
     roughnessMap : grassRoughnessTexture
