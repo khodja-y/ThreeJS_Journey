@@ -14,3 +14,11 @@ npm run dev
 # Build for production in the dist/ directory
 npm run build
 ```
+## GSAP
+``` bash
+# Install gsap without bonus plugins
+npm install gsap
+
+```
+For more go to 
+<a href="https://greensock.com/docs/v3/Installation?checked=core,flip,scrollTrigger,scrollTo,draggable,easel#modules" target="_blank">gsap</a>
