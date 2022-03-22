@@ -2,7 +2,12 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'lil-gui'
-import CANNON, { Plane } from 'cannon'
+
+//CANNON JS
+// import CANNON from 'cannon'
+
+//CANNON ES
+import * as CANNON from 'cannon-es'
 
 
 
@@ -42,6 +47,21 @@ const environmentMapTexture = cubeTextureLoader.load([
 ])
 
 /**
+ * Sounds
+ */
+const hitSound = new Audio('/sounds/hit.mp3');
+
+const playHitSound = (collision) =>
+{
+    if(collision.contact.getImpactVelocityAlongNormal() > 1.5){
+        hitSound.volume = Math.random();
+        hitSound.currentTime = 0;
+        hitSound.play();
+    }
+}
+
+
+/**
  * Physics
  */
 
@@ -49,6 +69,10 @@ const environmentMapTexture = cubeTextureLoader.load([
 //World
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0);
+
+//Optimisation
+world.broadphase = new CANNON.SAPBroadphase(world);
+world.allowSleep = true;
 
 //Physics Material
 const concreteMaterial = new CANNON.Material('concrete');
@@ -208,6 +232,13 @@ const sphereMaterial = new THREE.MeshStandardMaterial({
     envMap: environmentMapTexture
 })
 
+const box = new THREE.BoxGeometry(1, 1, 1);
+const boxMaterial = new THREE.MeshStandardMaterial({
+    metalness: 0.3,
+    roughness: 0.4,
+    envMap: environmentMapTexture
+})
+
 const createSphere = (radius, position) =>
 {
 
@@ -221,7 +252,7 @@ const createSphere = (radius, position) =>
 
     scene.add(mesh);
 
-    const shape = new CANNON.Sphere(radius);
+    const shape = new CANNON.Sphere(radius); 
     const body = new CANNON.Body({
         mass: 1,
         position: new CANNON.Vec3(0, 3, 0),
@@ -234,31 +265,89 @@ const createSphere = (radius, position) =>
     objectToUpdate.push({mesh, body});
 }
 
-const nbrSpheres = parameters.nbrSpheres;
-createSphere(0.5, {x: 0, y: 3, z: 0});
-
-const createSpheres = (count) => 
+const createBox = (width, height, depth, position) =>
 {
-    if(objectToUpdate.length != 0)
-    {
-        for(let object of objectToUpdate){
-            scene.remove(object.mesh)
-            world.remove(object.body)
-            // delete object.mesh;
-            // delete object.shape;
-        }
-        objectToUpdate = [];
-    }
 
-    for(let i=0; i<count; i++)
-    {
-        
-        createSphere(0.5, {
-            x: (Math.random() - 0.5) * 3, 
-            y: 3, 
-            z: (Math.random() - 0.5) * 3})
-    }
+    const mesh = new THREE.Mesh(
+        box,
+        boxMaterial
+    );
+    mesh.scale.set(width, height, depth);
+    mesh.castShadow = true;
+    mesh.position.copy(position);
+
+    scene.add(mesh);
+
+    const shape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2));
+    const body = new CANNON.Body({
+        mass: 1,
+        position: new CANNON.Vec3(0, 3, 0),
+        shape: shape,
+        material: defaultMaterial
+    });
+    body.position.copy(mesh.position);
+
+    body.addEventListener('collide', playHitSound)
+
+    world.addBody(body);
+    
+    objectToUpdate.push({mesh, body});
 }
+
+
+/**
+ * // const nbrSpheres = parameters.nbrSpheres;
+// createSphere(0.5, {x: 0, y: 3, z: 0});
+
+// const createSpheres = (count) => 
+// {
+//     if(objectToUpdate.length != 0)
+//     {
+//         for(let object of objectToUpdate){
+//             scene.remove(object.mesh)
+//             world.remove(object.body)
+//             // delete object.mesh;
+//             // delete object.shape;
+//         }
+//         objectToUpdate = [];
+//     }
+
+//     for(let i=0; i<count; i++)
+//     {
+        
+//         createSphere(0.5, {
+//             x: (Math.random() - 0.5) * 3, 
+//             y: 3, 
+//             z: (Math.random() - 0.5) * 3})
+//     }
+// }
+
+// const createBoxes = (count) => 
+// {
+//     if(objectToUpdate.length != 0)
+//     {
+//         for(let object of objectToUpdate){
+//             scene.remove(object.mesh)
+//             world.remove(object.body)
+//             // delete object.mesh;
+//             // delete object.shape;
+//         }
+//         objectToUpdate = [];
+//     }
+
+//     for(let i=0; i<count; i++)
+//     {
+        
+//         createBox(0.5, {
+//             x: (Math.random() - 0.5) * 3, 
+//             y: 3, 
+//             z: (Math.random() - 0.5) * 3})
+//     }
+// }
+ */
+
+
+
 
 /**
  * Animate
@@ -285,6 +374,7 @@ const tick = () =>
     for(const object of objectToUpdate)
     {
         object.mesh.position.copy(object.body.position)
+        object.mesh.quaternion.copy(object.body.quaternion)
     }
 
     // sphere.position.copy(sphereBody.position);
@@ -308,11 +398,11 @@ tick()
 /**
  * Debug
  */
-gui.add(parameters, 'nbrSpheres')
-    .min(1)
-    .max(100)
-    .step(1)
-    .onChange(createSpheres)
+// gui.add(parameters, 'nbrSpheres')
+//     .min(1)
+//     .max(100)
+//     .step(1)
+//     .onChange(createSpheres)
 
 
 debugObject.createSphere = () =>
@@ -324,5 +414,39 @@ debugObject.createSphere = () =>
     })
 }
 
+debugObject.createBox = () =>
+{
+
+    createBox(Math.random(),
+              Math.random(),
+              Math.random(),
+            {   
+              x: (Math.random() - 0.5) * 3, 
+              y: 3, 
+              z: (Math.random() - 0.5) * 3
+            }
+    )
+}
+
+debugObject.reset = () =>
+{
+    for(const object of objectToUpdate)
+    {
+        //Remove event
+        object.body.removeEventListener('collide', playHitSound);
+
+        //Remove body
+        world.removeBody(object.body);
+
+        //Remove Mesh
+        scene.remove(object.mesh);
+    }
+
+    objectToUpdate.splice(0, objectToUpdate.length)
+}
+
 gui.add(debugObject, 'createSphere')
+gui.add(debugObject, 'createBox')
+
+gui.add(debugObject, 'reset')
 
