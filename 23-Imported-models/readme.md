@@ -14,3 +14,8 @@ npm run dev
 # Build for production in the dist/ directory
 npm run build
 ```
+
+## Draco files
+We can find them in 'node_modules/three/examples/js/libs/' <br>
+Copy the Draco folder and paste it in the static folder
+

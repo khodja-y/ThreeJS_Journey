@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import * as dat from 'lil-gui'
 
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+
 
 
 /**
@@ -20,21 +22,33 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * GLTF IMPORT
+ * Draco Loader
+ */
+ const dracoLoader = new DRACOLoader();
+ //Workers
+ dracoLoader.setDecoderPath('/draco/');
+
+/**
+ * GLTF Loader
  */
 const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader)
 
 
-const group = new THREE.Group();
+let mixer = null;
 
 gltfLoader.load(
     // '/models/Earth/glTF/LowPolyEarth.gltf',
     // '/models/Duck/glTF/Duck.gltf',
-    '/models/FlightHelmet/glTF/FlightHelmet.gltf',
+    '/models/Fox/glTF/Fox.gltf',
     (gltf) =>
     {
         console.log('success');
         console.log(gltf);
+
+        mixer = new THREE.AnimationMixer(gltf.scene);
+        const action = mixer.clipAction(gltf.animations[1]);
+
 
         // group.copy(gltf.scene);
 
@@ -54,7 +68,14 @@ gltfLoader.load(
         // }
 
         //third solution
+        gltf.scene.scale.set(0.025,0.025,0.025);
         scene.add(gltf.scene);
+
+        action.play();
+        // action.setLoop(true)
+        action.loop = true;
+
+
     },
     (progress) =>
     {
@@ -68,7 +89,6 @@ gltfLoader.load(
     }
 )
 
-scene.add(group)
 /**
  * Floor
  */
@@ -165,6 +185,13 @@ const tick = () =>
 
     // Update controls
     controls.update()
+
+    //Update mixer
+    if(mixer)
+    {
+        mixer.update(deltaTime);
+    }
+    
 
     // Render
     renderer.render(scene, camera)
