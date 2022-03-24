@@ -1,13 +1,9 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-//load the glTF loader
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as dat from 'lil-gui'
-
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-
-
 
 /**
  * Base
@@ -22,69 +18,22 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Draco Loader
+ * Models
  */
- const dracoLoader = new DRACOLoader();
- //Workers
- dracoLoader.setDecoderPath('/draco/');
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('/draco/')
 
-/**
- * GLTF Loader
- */
-const gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader()
 gltfLoader.setDRACOLoader(dracoLoader)
 
-
-let mixer = null;
+let mixer = null
 
 gltfLoader.load(
-    // '/models/Earth/glTF/LowPolyEarth.gltf',
-    // '/models/Duck/glTF/Duck.gltf',
-    '/models/Fox/glTF/Fox.gltf',
+    '/models/SummerBeach/glTF/SummerBeach.gltf',
     (gltf) =>
     {
-        console.log('success');
-        console.log(gltf);
-
-        mixer = new THREE.AnimationMixer(gltf.scene);
-        const action = mixer.clipAction(gltf.animations[1]);
-
-
-        // group.copy(gltf.scene);
-
-        // scene.add(gltf.scene.children[0])
-
-        //first solution
-        // while(gltf.scene.children.length)
-        // {
-        //     scene.add(gltf.scene.children[0])
-        // }
-
-        //second solution
-        // const children = [...gltf.scene.children];
-        // for(const child of children)
-        // {
-        //     scene.add(child)
-        // }
-
-        //third solution
-        gltf.scene.scale.set(0.025,0.025,0.025);
-        scene.add(gltf.scene);
-
-        action.play();
-        action.loop = true;
-
-
-    },
-    (progress) =>
-    {
-        console.log('progress');
-        console.log(progress);
-    },
-    (error) =>
-    {
-        console.log('error');
-        console.log(error);
+        gltf.scene.scale.set(2.0, 2.0, 2.0);
+        scene.add(gltf.scene)
     }
 )
 
@@ -92,7 +41,7 @@ gltfLoader.load(
  * Floor
  */
 const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10),
+    new THREE.PlaneGeometry(50, 50),
     new THREE.MeshStandardMaterial({
         color: '#444444',
         metalness: 0,
@@ -101,7 +50,7 @@ const floor = new THREE.Mesh(
 )
 floor.receiveShadow = true
 floor.rotation.x = - Math.PI * 0.5
-// scene.add(floor)
+scene.add(floor)
 
 /**
  * Lights
@@ -148,16 +97,13 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(2, 2, 2)
+camera.position.set(- 8, 4, 8)
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
-controls.target.set(0, 0.75, 0)
+controls.target.set(0, 1, 0)
 controls.enableDamping = true
-
-
-// camera.copy(group.camera[0]);
 
 /**
  * Renderer
@@ -182,15 +128,13 @@ const tick = () =>
     const deltaTime = elapsedTime - previousTime
     previousTime = elapsedTime
 
-    // Update controls
-    controls.update()
-
-    //Update mixer
     if(mixer)
     {
-        mixer.update(deltaTime);
+        mixer.update(deltaTime)
     }
-    
+
+    // Update controls
+    controls.update()
 
     // Render
     renderer.render(scene, camera)
