@@ -27,9 +27,9 @@ export default class World
         this.resources.on('ready', () =>
         {
             //Setup
-            this.floor = new Floor();
-            this.fox = new Fox();
-            // this.island = new Island();
+            // this.floor = new Floor();
+            // this.fox = new Fox();
+            this.island = new Island();
 
             //Apply the envMap after the object to update the materials
             this.environment = new Environment();
