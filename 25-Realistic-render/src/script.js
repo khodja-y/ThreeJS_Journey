@@ -70,8 +70,8 @@ const Helmet = new THREE.Group();
 
 gltfLoader.load(
     // 'models/FlightHelmet/glTF/FlightHelmet.gltf',
-    // 'models/Burger/Burger.gltf',
-    'models/hamburger.glb',
+    'models/Burger/Burger.gltf',
+    // 'models/hamburger.glb',
     (gltf) =>
     {
         console.log('success');
