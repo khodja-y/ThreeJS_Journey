@@ -24,11 +24,25 @@ const scene = new THREE.Scene()
  */
 const textureLoader = new THREE.TextureLoader()
 
+const flagTexture = textureLoader.load('/textures/flag-algeria.jpg')
+
 /**
  * Test mesh
  */
 // Geometry
 const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
+
+const count = geometry.attributes.position.count;
+const randoms = new Float32Array(count);
+
+for(let i=0; i< count; i++) 
+{
+    randoms[i] = Math.random();
+}
+
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+
+// console.log(geometry.attributes);
 
 // Material
 // const material = new THREE.RawShaderMaterial(
@@ -56,17 +70,44 @@ const geometry = new THREE.PlaneGeometry(1, 1, 32, 32)
 //     }
 // )
 
-const material = new THREE.RawShaderMaterial(
+
+
+// const material = new THREE.RawShaderMaterial(
+// {
+//     vertexShader: testVertexShader,
+//     fragmentShader: testFragmentShader,
+//     wireframe: false,
+//     side: THREE.DoubleSide,
+//     transparent: true,
+//     uniforms:
+//     {
+//         uFrequency: {value: new THREE.Vector2(10, 8)},
+//         uTime: {value: 0},
+//         uColor: {value: new THREE.Color('orange')},
+//         uTexture: {value: flagTexture}
+//     }
+// });
+const material = new THREE.ShaderMaterial(
 {
     vertexShader: testVertexShader,
     fragmentShader: testFragmentShader,
     wireframe: false,
     side: THREE.DoubleSide,
-    transparent: true
-})
+    transparent: true,
+    uniforms:
+    {
+        uFrequency: {value: new THREE.Vector2(10, 8)},
+        uTime: {value: 0},
+        uColor: {value: new THREE.Color('orange')},
+        uTexture: {value: flagTexture}
+    }
+});
+
+
 
 // Mesh
 const mesh = new THREE.Mesh(geometry, material)
+mesh.scale.y = 2/3;
 scene.add(mesh)
 
 /**
@@ -130,6 +171,9 @@ const tick = () =>
     // Update controls
     controls.update()
 
+    //Update uniform time
+    material.uniforms.uTime.value = elapsedTime;
+
     // Render
     renderer.render(scene, camera)
 
@@ -138,3 +182,26 @@ const tick = () =>
 }
 
 tick()
+
+
+/**
+ * Debug
+ */
+ gui
+    .add(material.uniforms.uFrequency.value, 'x')
+    .min(0)
+    .max(20)
+    .step(0.01)
+    .name('frequencyX');
+
+ gui
+    .add(material.uniforms.uFrequency.value, 'y')
+    .min(0)
+    .max(20)
+    .step(0.01)
+    .name('frequencyY');
+
+gui
+    .addColor(material.uniforms.uColor, 'value')
+    .onFinishChange(() => {material.needsUpdate = true})
+    
