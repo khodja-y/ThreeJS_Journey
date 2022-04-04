@@ -28,6 +28,8 @@ const matcapTexture = textureLoader.load('textures/matcaps/8.png')
  */
 const fontLoader = new FontLoader()
 
+const donuts = [];
+
 fontLoader.load(
     '/fonts/helvetiker_regular.typeface.json',
     (font) =>
@@ -68,7 +70,7 @@ fontLoader.load(
             donut.rotation.y = Math.random() * Math.PI
             const scale = Math.random()
             donut.scale.set(scale, scale, scale)
-
+            donuts.push(donut);
             scene.add(donut)
         }
     }
@@ -121,14 +123,46 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
+ * Cursor
+ */
+ const cursor = {};
+ cursor.x = 0;
+ cursor.y = 0;
+ 
+ window.addEventListener('mousemove', (_event) =>{
+     cursor.x = _event.clientX / sizes.width - 0.5;
+     cursor.y = -(_event.clientY / sizes.height - 0.5);
+ 
+     // console.log(cursor);
+ });
+
+const cameraGroup = new THREE.Group();
+cameraGroup.add(camera);
+
+scene.add(cameraGroup);
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
+let previousTime = 0;
 
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - previousTime;
+    previousTime = elapsedTime;
 
+    for(let d of donuts)
+    {
+        d.rotation.y += deltaTime * 0.5;
+    }
+
+    //Parallax
+    const parallaxX = cursor.x * 0.5;
+    const parallaxY = cursor.y * 0.5;
+    cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime;
+    cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime;
     // Update controls
     controls.update()
 
