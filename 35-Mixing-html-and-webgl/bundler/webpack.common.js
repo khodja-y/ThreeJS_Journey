@@ -78,7 +78,7 @@ module.exports = {
                 }
             },
 
-            //Shaders
+            // Shaders
             {
                 test: /\.(glsl|vs|fs|vert|frag)$/,
                 type: 'asset/source',

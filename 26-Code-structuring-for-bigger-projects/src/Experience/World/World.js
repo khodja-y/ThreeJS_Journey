@@ -43,5 +43,6 @@ export default class World
     update()
     {
         if(this.fox) this.fox.update();
+        if(this.island) this.island.update();
     }
 }
