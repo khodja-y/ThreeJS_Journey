@@ -11,7 +11,24 @@ import firefliesFragmentShader from './Shaders/Fireflies/fragment.glsl'
 import portalVertexShader from './Shaders/Portal/vertex.glsl'
 import portalFragmentShader from './Shaders/Portal/fragment.glsl'
 
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js'
+import {UnrealBloomPass} from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
+import {ShaderPass} from 'three/examples/jsm/postprocessing/ShaderPass.js'
 
+import {GammaCorrectionShader} from 'three/examples/jsm/shaders/GammaCorrectionShader.js'
+import {SMAAPass} from 'three/examples/jsm/postprocessing/SMAAPass.js'
+
+
+
+import Stats from 'Stats.js'
+
+/**
+ * Stats
+ */
+ const stats = new Stats()
+ stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+ document.body.appendChild(stats.dom)
 /**
  * Base
  */
@@ -86,11 +103,12 @@ const PortalLightMaterial = new THREE.ShaderMaterial({
     fragmentShader: portalFragmentShader
 })
 
+
 const PoleLightMaterial = new THREE.MeshBasicMaterial({
     color: 0xFF8E36,
-    transparent: true,
+    // transparent: true,
     // blending: THREE.AdditiveBlending,
-    opacity: 0.9
+    // opacity: 0.9
 })
 // GLTF loader
 const gltfLoader = new GLTFLoader()
@@ -227,12 +245,68 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.outputEncoding = THREE.sRGBEncoding
 
 /**
+ * PostProcess
+ */
+//Handles all the browsers
+let RenderTargetClass = null;
+
+if(renderer.getPixelRatio() === 1 && renderer.capabilities.isWebGL2)
+{
+    RenderTargetClass = THREE.WebGLRenderTarget
+    RenderTargetClass.samples = 1;
+    console.log('Using WebGLMultisampleRenderTarget')
+}
+else
+{
+    RenderTargetClass = THREE.WebGLRenderTarget
+    console.log('Using WebGLRenderTarget')
+}
+
+const renderTarget = new RenderTargetClass(
+    800,
+    600,
+    {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        format: THREE.RGBAFormat
+    }
+)
+
+
+const effectComposer = new EffectComposer(renderer, renderTarget);
+effectComposer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+effectComposer.setSize(sizes.width, sizes.height);
+
+const renderPass = new RenderPass(scene, camera);
+effectComposer.addPass(renderPass);
+
+const unrealBloomPass = new UnrealBloomPass();
+unrealBloomPass.enabled = true;
+unrealBloomPass.strength = 0.05;
+unrealBloomPass.radius = 2;
+unrealBloomPass.threshold = 0.8;
+// effectComposer.addPass(unrealBloomPass);
+
+const gammaCorrectionShader = new ShaderPass(GammaCorrectionShader);
+effectComposer.addPass(gammaCorrectionShader);
+
+//SMAA pass
+if(renderer.getPixelRatio() == 1 && !renderer.capabilities.isWebGL2)
+{
+    const smaaPass = new SMAAPass();
+    effectComposer.addPass(smaaPass);
+
+    console.log('Using SMAA');
+}
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
 
 const tick = () =>
 {
+    stats.begin();
     const elapsedTime = clock.getElapsedTime()
 
 
@@ -245,9 +319,11 @@ const tick = () =>
 
     // Render
     renderer.render(scene, camera)
+    // effectComposer.render();
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
+    stats.end()
 }
 
 tick()
