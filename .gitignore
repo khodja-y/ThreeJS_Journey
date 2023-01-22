@@ -109,3 +109,4 @@ package-lock.json*
 
 #GLTF
 **/static/models
+*.code-workspace
